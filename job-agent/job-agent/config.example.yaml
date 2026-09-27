@@ -1,0 +1,51 @@
+# =====================================================================
+# TEMPLATE config. Copy this to config.yaml and edit it.
+#   cp config.example.yaml config.yaml
+# Secrets are written as ${NAME} and come from environment variables (a .env
+# file locally, or GitHub Secrets in the cloud). Never put real keys here.
+# =====================================================================
+
+database:
+  path: "data/agent.db"
+
+notifications:
+  email:
+    enabled: true
+    smtp_host: "smtp.gmail.com"
+    smtp_port: 587
+    username: "${EMAIL_USERNAME}"
+    password: "${EMAIL_PASSWORD}"     # Gmail App Password (see README)
+    from: "${EMAIL_USERNAME}"
+    to: "you@example.com"             # where alerts are sent
+  ntfy:
+    enabled: false
+    server: "https://ntfy.sh"
+    topic: "change-me-to-something-random"
+
+gemini:
+  enabled: true
+  api_key: "${GEMINI_API_KEY}"
+  model: "gemini-2.5-flash-lite"
+  relevance_threshold: 6
+
+adzuna:
+  app_id: "${ADZUNA_APP_ID}"
+  app_key: "${ADZUNA_APP_KEY}"
+
+profiles:
+  - name: "example_profile"
+    posting_type: "both"              # "job", "postdoc", or "both"
+    candidate_profile: >
+      One paragraph describing the candidate: degree, research area, key skills,
+      and what is NOT a fit. The Gemini relevance check reads this directly.
+    keywords:
+      - "keyword one"
+      - "keyword two"
+    countries: ["gb", "de", "nl"]     # list of codes, or "any" for global
+    adzuna_what: "search words for general job boards"
+    euraxess_keywords: "search words for EURAXESS"
+    university_pages:
+      - name: "Some University vacancies"
+        url: "https://example.edu/vacancies"
+        country: "Country"
+  # Add more profiles below to run several searches independently.
