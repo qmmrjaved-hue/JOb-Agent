@@ -1,0 +1,45 @@
+name: Job Agent
+
+on:
+  schedule:
+    - cron: "0 6 * * *"     # every day at 06:00 UTC (about 07:00-08:00 Italy)
+    - cron: "0 7 * * 1"     # every Monday at 07:00 UTC: weekly summary
+  workflow_dispatch: {}      # adds a "Run workflow" button for manual runs
+
+permissions:
+  contents: write            # needed so the run can commit the seen-database back
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run the agent
+        env:
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+        run: |
+          if [ "${{ github.event.schedule }}" = "0 7 * * 1" ]; then
+            python -m agent.main --weekly-summary
+          else
+            python -m agent.main
+          fi
+
+      - name: Save what the agent has seen
+        run: |
+          git config user.name "job-agent"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/agent.db
+          git commit -m "Update seen postings [skip ci]" || echo "no changes to commit"
+          git push || echo "nothing to push"
