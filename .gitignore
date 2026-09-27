@@ -1,7 +1,0 @@
-__pycache__/
-*.pyc
-.env
-logs/
-
-# NOTE: data/agent.db is intentionally NOT ignored. It is committed back after
-# each run so the agent remembers which postings it has already seen.
